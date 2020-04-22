@@ -1,66 +1,68 @@
 <template>
-  <div>
+  <form>
     <label>
       Series
-      <select @change="selectSeries" v-model="componentSeries" multiple>
+      <select v-model="selectedSeries" multiple>
         <option v-for="seriesKey in series.keys()" :key="seriesKey">
           {{ series[seriesKey] }}
         </option>
       </select>
     </label>
-    <label v-if="!componentSeries.length">
-      Sort by
-      <select @change="selectSortBy" v-model="componentSortBy">
-        <option value="duration">Duration</option>
-        <option value="imdbRating">IMBd Rating</option>
-        <option value="metascore">Metascore</option>
-        <option value="mpaa">MPAA</option>
-        <option value="title">Title</option>
-      </select>
-    </label>
-    <label v-if="!componentSeries.length">
+    <label>
       MPAA
-      <select @change="selectMPAA" v-model="componentMPAAs" multiple>
+      <select v-model="selectedMPAAs" multiple>
         <option v-for="mpaaKey in mpaas.keys()" :key="mpaaKey">
           {{ mpaas[mpaaKey] }}
         </option>
       </select>
     </label>
-    <label v-if="!componentSeries.length">
+    <label>
       Genre
-      <select @change="selectCategory" v-model="componentCategories" multiple>
+      <select v-model="selectedCategories" multiple>
         <option v-for="categoryKey in categories.keys()" :key="categoryKey">
           {{ categories[categoryKey] }}
         </option>
       </select>
     </label>
-    <label v-if="!componentSeries.length">
+    <label>
       Actors
-      <select @change="selectActor" v-model="componentActors" multiple>
+      <select v-model="selectedActors" multiple>
         <option v-for="actorKey in actors.keys()" :key="actorKey">
           {{ actors[actorKey] }}
         </option>
       </select>
     </label>
-    <label v-if="!componentSeries.length">
+    <label>
       Directors
-      <select @change="selectDirector" v-model="componentDirectors" multiple>
+      <select v-model="selectedDirectors" multiple>
         <option v-for="directorKey in directors.keys()" :key="directorKey">
           {{ directors[directorKey] }}
         </option>
       </select>
     </label>
-  </div>
+    <div class="filter">
+      <label>
+        Sort by
+        <select v-model="selectedSorting">
+          <option value="duration">Duration</option>
+          <option value="imdbRating">IMBd Rating</option>
+          <option value="metascore">Metascore</option>
+          <option value="mpaa">MPAA</option>
+          <option value="title">Title</option>
+        </select>
+      </label>
+
+      <button type="reset" class="button" @click="resetFilters">
+        Reset Filters
+      </button>
+    </div>
+  </form>
 </template>
 
 <script>
 export default {
   name: "MediaListFilter",
   props: {
-    sortBy: {
-      type: String,
-      required: true
-    },
     categories: {
       type: Array,
       required: true
@@ -81,79 +83,131 @@ export default {
       type: Array,
       required: true
     },
-    selectedCategories: {
+    defaultCategories: {
       type: Array,
       required: true
     },
-    selectedActors: {
+    defaultActors: {
       type: Array,
       required: true
     },
-    selectedDirectors: {
+    defaultDirectors: {
       type: Array,
       required: true
     },
-    selectedMPAAs: {
+    defaultMPAAs: {
       type: Array,
       required: true
     },
-    selectedSeries: {
+    defaultSeries: {
       type: Array,
+      required: true
+    },
+    defaultSorting: {
+      type: String,
       required: true
     }
   },
-  data: function() {
-    return {
-      componentSortBy: this.sortBy,
-      componentCategories: this.selectedCategories,
-      componentActors: this.selectedActors,
-      componentDirectors: this.selectedDirectors,
-      componentMPAAs: this.selectedMPAAs,
-      componentSeries: this.selectedSeries
-    };
+  computed: {
+    selectedCategories: {
+      get() {
+        return this.defaultCategories;
+      },
+      set(value) {
+        this.$emit("category-selected", value);
+      }
+    },
+    selectedSeries: {
+      get() {
+        return this.defaultSeries;
+      },
+      set(value) {
+        this.$emit("series-selected", value);
+      }
+    },
+    selectedActors: {
+      get() {
+        return this.defaultActors;
+      },
+      set(value) {
+        this.$emit("actors-selected", value);
+      }
+    },
+    selectedDirectors: {
+      get() {
+        return this.defaultDirectors;
+      },
+      set(value) {
+        this.$emit("directors-selected", value);
+      }
+    },
+    selectedSorting: {
+      get() {
+        return this.defaultSorting;
+      },
+      set(value) {
+        this.$emit("sort-selected", value);
+      }
+    },
+    selectedMPAAs: {
+      get() {
+        return this.defaultMPAAs;
+      },
+      set(value) {
+        this.$emit("mpaas-selected", value);
+      }
+    }
   },
   methods: {
-    selectSortBy: function() {
-      this.$emit("sort-selected", this.componentSortBy);
-    },
-    selectCategory: function() {
-      this.$emit("category-selected", this.componentCategories);
-    },
-    selectActor: function() {
-      this.$emit("actors-selected", this.componentActors);
-    },
-    selectDirector: function() {
-      this.$emit("directors-selected", this.componentDirectors);
-    },
-    selectMPAA: function() {
-      this.$emit("mpaas-selected", this.componentMPAAs);
-    },
-    selectSeries: function() {
-      this.$emit("series-selected", this.componentSeries);
+    resetFilters: function() {
+      this.$emit("reset-filters");
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-div {
+form {
+  align-items: flex-end;
   display: flex;
   margin-bottom: var(--grid-spacing);
   margin-top: var(--grid-spacing);
 }
 
-label {
-  font-size: 0.8em;
+label,
+.filter {
   font-weight: var(--weight-bold);
   margin-right: var(--grid-spacing);
+  width: calc(100% / 6);
 
   &:last-child {
     margin-right: 0;
   }
 }
 
+label {
+  font-size: 0.7em;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
 select {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 3px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0;
+  color: var(--white);
   display: block;
-  font-size: 1rem;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-size: 0.85rem;
+  padding: 0.8em 1em;
+  width: 100%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.button {
+  font-size: 1em;
+  margin-top: 1em;
+  width: 100%;
 }
 </style>

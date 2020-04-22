@@ -1,23 +1,24 @@
 <template>
   <div>
     <MediaListFilter
-      :sortBy="sortBy"
       :categories="sortedCategories"
       :actors="sortedActors"
       :directors="sortedDirectors"
       :mpaas="sortedMPAAs"
       :series="sortedSeries"
-      :selectedCategories="selectedCategories"
-      :selectedActors="selectedActors"
-      :selectedDirectors="selectedDirectors"
-      :selectedMPAAs="selectedMPAAs"
-      :selectedSeries="selectedSeries"
+      :defaultCategories="selectedCategories"
+      :defaultActors="selectedActors"
+      :defaultDirectors="selectedDirectors"
+      :defaultMPAAs="selectedMPAAs"
+      :defaultSeries="selectedSeries"
+      :defaultSorting="selectedSorting"
       @sort-selected="sortSelected"
       @category-selected="categoriesSelected"
       @actors-selected="actorSelected"
       @directors-selected="directorSelected"
       @mpaas-selected="mpaaSelected"
       @series-selected="seriesSelected"
+      @reset-filters="resetFilters"
     />
     <ul>
       <MediaListItem
@@ -45,17 +46,17 @@ export default {
     return {
       mediaItems: [],
       selected: false,
-      sortBy: "title",
       selectedCategories: [],
       selectedActors: [],
       selectedDirectors: [],
       selectedMPAAs: [],
-      selectedSeries: []
+      selectedSeries: [],
+      selectedSorting: "title"
     };
   },
   methods: {
     sortSelected: function(sortBy) {
-      this.sortBy = sortBy;
+      this.selectedSorting = sortBy;
     },
     categoriesSelected: function(categories) {
       this.selectedCategories = categories;
@@ -74,6 +75,14 @@ export default {
     },
     clicked: function(mediaID) {
       this.selected = mediaID;
+    },
+    resetFilters: function() {
+      this.selectedSorting = "title";
+      this.selectedCategories = [];
+      this.selectedActors = [];
+      this.selectedDirectors = [];
+      this.selectedMPAAs = [];
+      this.selectedSeries = [];
     },
     fetchMedia: function() {
       const GoogleSpreadsheetCode =
@@ -149,11 +158,9 @@ export default {
   computed: {
     sortedCategories: function() {
       let items = [...this.parsedMedia],
-          categories = [];
+        categories = [];
       items.forEach(function(item) {
-        categories = [
-          ...new Set([...categories, ...item.categories])
-        ];
+        categories = [...new Set([...categories, ...item.categories])];
       });
 
       return categories.sort();
@@ -162,9 +169,7 @@ export default {
       let items = [...this.parsedMedia],
         actors = [];
       items.forEach(function(item) {
-        actors = [
-          ...new Set([...actors, ...item.actors])
-        ];
+        actors = [...new Set([...actors, ...item.actors])];
       });
 
       return actors.sort();
@@ -173,9 +178,7 @@ export default {
       let items = [...this.parsedMedia],
         directors = [];
       items.forEach(function(item) {
-        directors = [
-          ...new Set([...directors, ...item.director])
-        ];
+        directors = [...new Set([...directors, ...item.director])];
       });
 
       return directors.sort();
@@ -193,7 +196,7 @@ export default {
       let items = [...this.parsedMedia],
         series = [];
       items.forEach(function(item) {
-        if(item.series !== "N/A") {
+        if (item.series !== "N/A") {
           series.push(item.series);
         }
       });
@@ -270,11 +273,11 @@ export default {
       // Sort results
       return items.sort((a, b) => {
         // Sort by IMDb ratings
-        if(this.sortBy === "imdbRating") {
+        if (this.selectedSorting === "imdbRating") {
           if (a.imdbRating > b.imdbRating) {
             return -1;
-          } else if(a.imdbRating === b.imdbRating) {
-            if(a.imdbRatings > b.imdbRatings) {
+          } else if (a.imdbRating === b.imdbRating) {
+            if (a.imdbRatings > b.imdbRatings) {
               return -1;
             } else {
               return 1;
@@ -282,12 +285,12 @@ export default {
           } else {
             return 1;
           }
-        // Sort my metascore
-        } else if(this.sortBy === "metascore") {
+        } else if (this.selectedSorting === "metascore") {
+          // Sort my metascore
           if (a.metascore > b.metascore) {
             return -1;
-          } else if(a.metascore === b.metascore) {
-            if(a.imdbRatings > b.imdbRatings) {
+          } else if (a.metascore === b.metascore) {
+            if (a.imdbRatings > b.imdbRatings) {
               return -1;
             } else {
               return 1;
@@ -295,10 +298,10 @@ export default {
           } else {
             return 1;
           }
-        } else if(this.selectedSeries.length) {
-          return (a.seriesNum > b.seriesNum ? 1 : -1);
+        } else if (this.selectedSeries.length) {
+          return a.seriesNum > b.seriesNum ? 1 : -1;
         } else {
-          return (a[this.sortBy] > b[this.sortBy] ? 1 : -1);
+          return a[this.selectedSorting] > b[this.selectedSorting] ? 1 : -1;
         }
       });
     }

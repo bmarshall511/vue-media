@@ -25,7 +25,7 @@
           {{ media.categories[category] }}
         </li>
       </ul>
-      <div class="media__buttons">
+      <div class="media__buttons" v-if="selected">
         <a
           class="button yellow"
           :href="`https://www.imdb.com/title/` + media.imdb + `/`"
@@ -41,11 +41,13 @@
         <button class="button" @click="reset">Close</button>
       </div>
     </div>
-    <div class="media__content">
+    <div class="media__content" v-if="selected">
       <div>
         <iframe
           v-if="selected"
-          :src="`https://www.youtube.com/embed/` + media.youtube + `?&autoplay=1`"
+          :src="
+            `https://www.youtube.com/embed/` + media.youtube + `?&autoplay=1`
+          "
           frameborder="0"
           allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen
@@ -150,9 +152,6 @@ iframe {
 }
 
 .media__content {
-  visibility: hidden;
-  max-width: 0;
-
   > div {
     &:first-child {
       overflow: hidden;
@@ -167,7 +166,6 @@ iframe {
   margin-left: calc(var(--grid-spacing) / 4 * -1);
   margin-right: calc(var(--grid-spacing) / 4 * -1);
   margin-top: var(--grid-spacing);
-  visibility: hidden;
 
   .button {
     flex-grow: 1;
@@ -201,11 +199,6 @@ iframe {
 
     .media__teaser {
       width: 20%;
-    }
-
-    .media__buttons,
-    .media__content {
-      visibility: visible;
     }
 
     .media__content {
