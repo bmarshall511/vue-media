@@ -1,6 +1,10 @@
 <template>
   <form>
     <label>
+      Search
+      <input type="text" v-model="textSearch" />
+    </label>
+    <label>
       Series
       <select v-model="selectedSeries" multiple>
         <option v-for="seriesKey in series.keys()" :key="seriesKey">
@@ -44,8 +48,10 @@
       <label>
         Sort by
         <select v-model="selectedSorting">
+          <option value="released">Date Released</option>
           <option value="duration">Duration</option>
           <option value="imdbRating">IMBd Rating</option>
+          <option value="watched">Marshall Rating</option>
           <option value="metascore">Metascore</option>
           <option value="mpaa">MPAA</option>
           <option value="title">Title</option>
@@ -106,9 +112,21 @@ export default {
     defaultSorting: {
       type: String,
       required: true
+    },
+    defaultSearch: {
+      type: String,
+      required: false
     }
   },
   computed: {
+    textSearch: {
+      get() {
+        return this.defaultSearch;
+      },
+      set(value) {
+        this.$emit("search-query", value);
+      }
+    },
     selectedCategories: {
       get() {
         return this.defaultCategories;
@@ -178,7 +196,7 @@ label,
 .filter {
   font-weight: var(--weight-bold);
   margin-right: var(--grid-spacing);
-  width: calc(100% / 6);
+  width: calc(100% / 7);
 
   &:last-child {
     margin-right: 0;
@@ -191,7 +209,8 @@ label {
   text-transform: uppercase;
 }
 
-select {
+select,
+input {
   background-color: rgba(255, 255, 255, 0.05);
   border: 3px solid rgba(255, 255, 255, 0.07);
   border-radius: 0;
@@ -201,6 +220,9 @@ select {
   font-size: 0.85rem;
   padding: 0.8em 1em;
   width: 100%;
+}
+
+select {
   -webkit-appearance: none;
   -moz-appearance: none;
 }

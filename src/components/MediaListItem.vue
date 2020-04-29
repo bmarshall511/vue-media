@@ -1,8 +1,11 @@
 <template>
-  <li class="media" :class="{ 'is-active': selected }">
+  <li class="media" :class="{ 'is-active': selected, watched: media.watched }">
     <div class="media__teaser">
       <div class="media__poster">
-        <img @click="select" :src="media.poster" />
+        <img @click="select" :src="media.poster" class="media__img" />
+        <div class="media__watched" v-if="media.watched">
+          {{ media.watched }}<span>/5</span>
+        </div>
         <div class="media__imdb-rating">
           <img src="@/assets/imdb-logo.svg" alt="IMDb Rating" />
           {{ media.imdbRating }}<span>/10</span>
@@ -82,7 +85,6 @@ export default {
   methods: {
     select() {
       this.$emit("clicked", this.media.key);
-      window.scrollTo(0, 0);
     },
     reset() {
       this.$emit("clicked", false);
@@ -122,20 +124,39 @@ iframe {
   }
 }
 
+.media__watched,
+.media__imdb-rating,
+.media__metascore {
+  position: absolute;
+  z-index: 2;
+}
+
 .media__imdb-rating,
 .media__metascore {
   bottom: var(--grid-spacing);
   font-size: 0.9em;
   font-weight: var(--weight-bold);
   line-height: 1;
-  position: absolute;
-  z-index: 2;
 
   img {
     height: 1.5em;
     margin-top: -0.2em;
     vertical-align: middle;
     width: auto;
+  }
+}
+
+.media__watched {
+  color: var(--text-color);
+  font-size: 4rem;
+  font-weight: var(--weight-bold);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  span {
+    font-size: 0.4em;
+    font-weight: 100;
   }
 }
 
@@ -180,6 +201,7 @@ iframe {
   margin-bottom: var(--grid-spacing);
   margin-left: calc(var(--grid-spacing) / 2);
   margin-right: calc(var(--grid-spacing) / 2);
+  transition: all 0.3s;
   width: calc(100% / 2 - var(--grid-spacing));
 
   @include breakpoint(small) {
@@ -191,11 +213,17 @@ iframe {
   }
 
   &.is-active {
-    order: -1;
     background-color: var(--black);
     font-size: 1em;
+    height: 100vh;
+    left: 50%;
+    margin: 0;
     padding: 1em;
-    width: calc(100% - var(--grid-spacing));
+    position: fixed;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    z-index: 9;
 
     .media__teaser {
       width: 20%;
@@ -205,6 +233,12 @@ iframe {
       max-width: 100%;
       padding-left: var(--grid-spacing);
       width: 80%;
+    }
+  }
+
+  &.watched {
+    .media__img {
+      opacity: 0.3;
     }
   }
 }

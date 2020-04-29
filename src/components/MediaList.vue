@@ -12,6 +12,7 @@
       :defaultMPAAs="selectedMPAAs"
       :defaultSeries="selectedSeries"
       :defaultSorting="selectedSorting"
+      :defaultSearch="textSearch"
       @sort-selected="sortSelected"
       @category-selected="categoriesSelected"
       @actors-selected="actorSelected"
@@ -19,6 +20,7 @@
       @mpaas-selected="mpaaSelected"
       @series-selected="seriesSelected"
       @reset-filters="resetFilters"
+      @search-query="searchQuery"
     />
     <ul>
       <MediaListItem
@@ -51,7 +53,8 @@ export default {
       selectedDirectors: [],
       selectedMPAAs: [],
       selectedSeries: [],
-      selectedSorting: "title"
+      selectedSorting: "title",
+      textSearch: ""
     };
   },
   methods: {
@@ -72,6 +75,9 @@ export default {
     },
     seriesSelected: function(series) {
       this.selectedSeries = series;
+    },
+    searchQuery: function(query) {
+      this.textSearch = query;
     },
     clicked: function(mediaID) {
       this.selected = mediaID;
@@ -225,7 +231,8 @@ export default {
           language: item[13],
           youtube: item[14],
           series: item[15],
-          seriesNum: item[16]
+          seriesNum: item[16],
+          watched: item[17] ? item[17] : 0
         };
       });
 
@@ -270,6 +277,15 @@ export default {
         });
       }
 
+      // Filter search query
+      if (this.textSearch.length) {
+        items = items.filter(item => {
+          return !item.title
+            .toLowerCase()
+            .indexOf(this.textSearch.toLowerCase());
+        });
+      }
+
       // Sort results
       return items.sort((a, b) => {
         // Sort by IMDb ratings
@@ -279,6 +295,24 @@ export default {
           } else if (a.imdbRating === b.imdbRating) {
             if (a.imdbRatings > b.imdbRatings) {
               return -1;
+            } else {
+              return 1;
+            }
+          } else {
+            return 1;
+          }
+        } else if (this.selectedSorting === "watched") {
+          if (a.watched > b.watched) {
+            return -1;
+          } else if (a.watched === b.watched) {
+            if (a.imdbRating > b.imdbRating) {
+              return -1;
+            } else if (a.imdbRating === b.imdbRating) {
+              if (a.imdbRatings > b.imdbRatings) {
+                return -1;
+              } else {
+                return 1;
+              }
             } else {
               return 1;
             }
@@ -298,6 +332,8 @@ export default {
           } else {
             return 1;
           }
+        } else if (this.selectedSorting === "released") {
+          return a[this.selectedSorting] < b[this.selectedSorting] ? 1 : -1;
         } else if (this.selectedSeries.length) {
           return a.seriesNum > b.seriesNum ? 1 : -1;
         } else {
